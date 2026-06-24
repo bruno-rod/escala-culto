@@ -1,0 +1,1868 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escala do Culto - Igreja de Cristo em Atibaia</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f8fc;
+      --panel: #ffffff;
+      --panel-2: #f9fbfe;
+      --ink: #172238;
+      --muted: #66738a;
+      --line: #dce4ef;
+      --brand: #258fd0;
+      --brand-dark: #1673ad;
+      --accent: #f7bd24;
+      --magenta: #c92c8f;
+      --coral: #ef5e59;
+      --orange: #f38b35;
+      --soft: #eaf5fc;
+      --soft-accent: #faedf6;
+      --filled: #e8f5fc;
+      --filled-border: #2b9fde;
+      --warn: #fff4cf;
+      --danger: #b42318;
+      --shadow: 0 18px 48px rgba(35, 66, 103, 0.10);
+      --shadow-soft: 0 8px 24px rgba(35, 66, 103, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #edf7fd 0, var(--bg) 260px);
+      color: var(--ink);
+    }
+
+    button, input, select {
+      font: inherit;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      min-width: 0;
+      padding: 26px clamp(16px, 4vw, 44px) 20px;
+      border-bottom: 1px solid rgba(37, 143, 208, 0.18);
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      max-width: 1380px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 38px);
+      line-height: 1.05;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 6px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .tab-button {
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .tab-button.active {
+      background: var(--brand);
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(37, 143, 208, 0.22);
+    }
+
+    main {
+      min-width: 0;
+      width: min(1380px, 100%);
+      margin: 0 auto;
+      padding: 26px clamp(16px, 4vw, 44px) 44px;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 390px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel, .list-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .list-panel {
+      overflow: hidden;
+    }
+
+    .panel h2, .list-panel h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .list-panel h2 {
+      padding: 20px 20px 0;
+    }
+
+    .worker-filters {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(180px, 240px);
+      gap: 12px;
+      padding: 0 20px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .worker-results {
+      margin: 0;
+      padding: 10px 20px;
+      color: var(--muted);
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #344158;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    input, select {
+      min-height: 44px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #ffffff;
+    }
+
+    input:focus, select:focus {
+      outline: 3px solid rgba(37, 143, 208, 0.14);
+      border-color: var(--brand);
+      box-shadow: 0 0 0 1px rgba(37, 143, 208, 0.08);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .primary, .secondary, .danger, .ghost {
+      min-height: 42px;
+      border-radius: 6px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+
+    .primary {
+      background: var(--brand);
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(37, 143, 208, 0.18);
+    }
+
+    .primary:hover { background: var(--brand-dark); }
+
+    .secondary {
+      background: var(--soft);
+      color: var(--brand-dark);
+      border: 1px solid rgba(37, 143, 208, 0.25);
+    }
+
+    .secondary:hover {
+      background: #dff1fb;
+      border-color: var(--brand);
+    }
+
+    .danger {
+      background: #fff0ef;
+      color: var(--danger);
+      border: 1px solid rgba(180, 35, 24, 0.22);
+    }
+
+    .ghost {
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .schedule-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 16px;
+      padding: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .schedule-heading {
+      min-width: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .schedule-image-card {
+      min-height: 230px;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid rgba(37, 143, 208, 0.18);
+      background: #eaf5fc;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .schedule-image-card img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 230px;
+      object-fit: cover;
+    }
+
+    .schedule-command-area {
+      min-width: min(100%, 520px);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .period-controls {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) 118px;
+      gap: 10px;
+      padding: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .command-strip {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) 2fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .command-strip .primary {
+      min-height: 48px;
+      font-size: 15px;
+    }
+
+    .secondary-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .backup-actions {
+      padding: 10px;
+      background: #fbfcfe;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .backup-actions summary {
+      cursor: pointer;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 800;
+      list-style: none;
+    }
+
+    .backup-actions summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .backup-actions summary::after {
+      content: "+";
+      float: right;
+      color: var(--brand);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .backup-actions[open] summary::after {
+      content: "-";
+    }
+
+    .backup-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .backup-actions:not([open]) .backup-buttons {
+      display: none;
+    }
+
+    .help {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .message {
+      min-height: 20px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    .check-row input {
+      width: 18px;
+      min-height: 18px;
+      accent-color: var(--brand);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #56637a;
+      font-size: 12px;
+      text-transform: uppercase;
+      background: #f1f5fa;
+      letter-spacing: 0;
+    }
+
+    tbody tr:hover {
+      background: #f7fafd;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: #526078;
+      font-size: 17px;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--brand-dark);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .empty {
+      padding: 26px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .schedule-filter-bar {
+      display: grid;
+      grid-template-columns: minmax(200px, 280px) minmax(200px, 280px);
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 14px;
+      padding: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .schedule-wrap {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: auto;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .schedule {
+      min-width: 920px;
+    }
+
+    .schedule th:first-child,
+    .schedule td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: var(--panel);
+      min-width: 190px;
+      box-shadow: 1px 0 0 var(--line);
+    }
+
+    .schedule th:first-child {
+      background: #f1f5fa;
+      z-index: 2;
+    }
+
+    .schedule th {
+      min-width: 138px;
+      text-align: center;
+    }
+
+    .schedule td:not(:first-child) {
+      min-width: 138px;
+      padding: 8px;
+    }
+
+    .schedule select {
+      min-height: 38px;
+      padding: 8px;
+      font-size: 13px;
+    }
+
+    .assignment-stack {
+      display: grid;
+      gap: 6px;
+    }
+
+    .schedule-cell.filled {
+      background: var(--filled);
+      box-shadow: inset 3px 0 0 var(--filled-border);
+    }
+
+    .schedule-cell.filled select {
+      border-color: rgba(37, 143, 208, 0.46);
+      background: #ffffff;
+      color: #173e58;
+      font-weight: 700;
+    }
+
+    .schedule-cell.filled:hover {
+      background: #ddf0fb;
+    }
+
+    .schedule-cell.filter-match {
+      background: var(--soft-accent);
+      box-shadow: inset 3px 0 0 var(--magenta);
+    }
+
+    .schedule-cell.filter-match select {
+      border-color: rgba(201, 44, 143, 0.42);
+      color: #7d1e5c;
+    }
+
+    .schedule-cell.filter-muted {
+      opacity: 0.48;
+    }
+
+    .schedule-cell.empty-cell select {
+      color: #7c879a;
+      border-style: dashed;
+    }
+
+    .task-name {
+      font-weight: 700;
+      color: #26344b;
+    }
+
+    .conflict {
+      background: var(--warn);
+    }
+
+    .footnote {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 800px) {
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .tabs {
+        overflow-x: auto;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .worker-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .schedule-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .schedule-command-area {
+        min-width: 0;
+      }
+
+      .schedule-filter-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .command-strip,
+      .backup-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .period-controls {
+        grid-template-columns: minmax(150px, 1fr) 104px;
+      }
+
+      .secondary-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .schedule-filter-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .primary, .secondary, .danger, .ghost {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <div class="topbar">
+        <div>
+          <h1>Escala do Culto</h1>
+          <p class="subtitle">Igreja de Cristo em Atibaia</p>
+        </div>
+        <nav class="tabs" aria-label="Navegação principal">
+          <button class="tab-button active" type="button" data-view="scheduleView">Escala</button>
+          <button class="tab-button" type="button" data-view="workersView">Obreiros</button>
+          <button class="tab-button" type="button" data-view="tasksView">Tarefas</button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section id="scheduleView" class="view active" aria-labelledby="scheduleTitle">
+        <div class="schedule-hero">
+          <div class="schedule-heading">
+            <h2 id="scheduleTitle" class="visually-hidden">Escala do culto por domingos do bimestre</h2>
+            <div class="schedule-image-card">
+              <img src="assets/biblia-mateus-3-16.png" alt="Bíblia aberta iluminada por luz natural" />
+            </div>
+          </div>
+          <div class="schedule-command-area">
+            <div class="period-controls">
+              <label>
+                Mês inicial
+                <select id="startMonth"></select>
+              </label>
+              <label>
+                Ano
+                <input id="startYear" type="number" min="2020" max="2100" />
+              </label>
+            </div>
+            <div class="command-strip">
+              <button class="primary" id="generateSchedule" type="button">Gerar escala</button>
+              <div class="secondary-actions">
+                <button class="secondary" id="exportSchedule" type="button">Baixar Excel</button>
+                <button class="secondary" id="clearSchedule" type="button">Limpar escolhas</button>
+              </div>
+            </div>
+            <details class="backup-actions">
+              <summary>Backup e transferência</summary>
+              <div class="backup-buttons">
+                <button class="secondary" id="exportBackup" type="button">Exportar backup</button>
+                <button class="secondary" id="importBackup" type="button">Importar backup</button>
+              </div>
+              <input id="backupFile" type="file" accept="application/json,.json" hidden />
+            </details>
+          </div>
+        </div>
+
+        <div class="schedule-filter-bar">
+          <label>
+            Filtrar por nome
+            <select id="scheduleFilterWorker">
+              <option value="">Todos os obreiros</option>
+            </select>
+          </label>
+          <label>
+            Filtrar por tarefa
+            <select id="scheduleFilterTask">
+              <option value="">Todas as tarefas</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="scheduleContainer" class="schedule-wrap"></div>
+        <p class="footnote">A escala prioriza Mensagem, Cânticos, Ceia, Oferta, Abertura, Oração Final e Avisos e Pedidos, nesta ordem. A Contagem da Oferta recebe duas pessoas por domingo. Nenhuma tarefa fica vazia enquanto houver obreiros cadastrados; repetições são usadas somente em último caso.</p>
+      </section>
+
+      <section id="workersView" class="view" aria-labelledby="workersTitle">
+        <div class="layout">
+          <div class="panel">
+            <h2 id="workersTitle">Cadastro de obreiros</h2>
+            <form id="workerForm">
+              <input id="workerId" type="hidden" />
+              <label>
+                Nome completo
+                <input id="workerName" type="text" autocomplete="name" required />
+              </label>
+              <div>
+                <label>Tarefas que pode fazer</label>
+                <div id="workerTaskOptions" class="checkbox-grid"></div>
+              </div>
+              <div class="message" id="workerMessage" aria-live="polite"></div>
+              <div class="actions">
+                <button class="primary" type="submit">Salvar obreiro</button>
+                <button class="ghost" id="cancelWorkerEdit" type="button">Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="list-panel">
+            <h2>Obreiros cadastrados</h2>
+            <div class="worker-filters">
+              <label>
+                Buscar por nome
+                <input id="workerFilterName" type="search" placeholder="Digite parte do nome" />
+              </label>
+              <label>
+                Filtrar por tarefa
+                <select id="workerFilterTask">
+                  <option value="">Todas as tarefas</option>
+                </select>
+              </label>
+            </div>
+            <p id="workerResults" class="worker-results"></p>
+            <div id="workersTable"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tasksView" class="view" aria-labelledby="tasksTitle">
+        <div class="layout">
+          <div class="panel">
+            <h2 id="tasksTitle">Cadastro de tarefas</h2>
+            <form id="taskForm">
+              <input id="taskId" type="hidden" />
+              <label>
+                Nome da tarefa
+                <input id="taskName" type="text" required placeholder="Ex.: Louvor, Ceia, Recepção" />
+              </label>
+              <p class="help">As tarefas cadastradas aqui aparecem no cadastro dos obreiros e nas linhas da escala.</p>
+              <div class="message" id="taskMessage" aria-live="polite"></div>
+              <div class="actions">
+                <button class="primary" type="submit">Salvar tarefa</button>
+                <button class="ghost" id="cancelTaskEdit" type="button">Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="list-panel">
+            <h2>Tarefas cadastradas</h2>
+            <div id="tasksTable"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'ica_escala_culto_v1';
+    const monthNames = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+    const defaultState = {
+      tasks: [
+        { id: crypto.randomUUID(), name: 'Recepcao' },
+        { id: crypto.randomUUID(), name: 'Louvor' },
+        { id: crypto.randomUUID(), name: 'Ceia' },
+        { id: crypto.randomUUID(), name: 'Midia e som' }
+      ],
+      workers: [],
+      schedules: {}
+    };
+
+    let state = loadState();
+
+    const elements = {
+      tabs: document.querySelectorAll('.tab-button'),
+      views: document.querySelectorAll('.view'),
+      taskForm: document.getElementById('taskForm'),
+      taskId: document.getElementById('taskId'),
+      taskName: document.getElementById('taskName'),
+      taskMessage: document.getElementById('taskMessage'),
+      tasksTable: document.getElementById('tasksTable'),
+      cancelTaskEdit: document.getElementById('cancelTaskEdit'),
+      workerForm: document.getElementById('workerForm'),
+      workerId: document.getElementById('workerId'),
+      workerName: document.getElementById('workerName'),
+      workerMessage: document.getElementById('workerMessage'),
+      workerTaskOptions: document.getElementById('workerTaskOptions'),
+      workerFilterName: document.getElementById('workerFilterName'),
+      workerFilterTask: document.getElementById('workerFilterTask'),
+      workerResults: document.getElementById('workerResults'),
+      workersTable: document.getElementById('workersTable'),
+      cancelWorkerEdit: document.getElementById('cancelWorkerEdit'),
+      startMonth: document.getElementById('startMonth'),
+      startYear: document.getElementById('startYear'),
+      scheduleFilterWorker: document.getElementById('scheduleFilterWorker'),
+      scheduleFilterTask: document.getElementById('scheduleFilterTask'),
+      generateSchedule: document.getElementById('generateSchedule'),
+      exportSchedule: document.getElementById('exportSchedule'),
+      exportBackup: document.getElementById('exportBackup'),
+      importBackup: document.getElementById('importBackup'),
+      backupFile: document.getElementById('backupFile'),
+      clearSchedule: document.getElementById('clearSchedule'),
+      scheduleContainer: document.getElementById('scheduleContainer')
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return defaultState;
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          tasks: Array.isArray(parsed.tasks) ? parsed.tasks : defaultState.tasks,
+          workers: Array.isArray(parsed.workers) ? parsed.workers : [],
+          schedules: parsed.schedules && typeof parsed.schedules === 'object' ? parsed.schedules : {}
+        };
+      } catch {
+        return defaultState;
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function exportBackup() {
+      const exportedAt = new Date();
+      const backup = {
+        app: 'escala-culto-atibaia',
+        version: 1,
+        exportedAt: exportedAt.toISOString(),
+        state
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `backup-escala-culto-${exportedAt.toISOString().slice(0, 10)}.json`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        link.remove();
+        URL.revokeObjectURL(url);
+      }, 1000);
+    }
+
+    function normalizeImportedState(rawState) {
+      if (!rawState || typeof rawState !== 'object') {
+        throw new Error('Arquivo de backup invalido.');
+      }
+
+      const importedState = rawState.state && typeof rawState.state === 'object' ? rawState.state : rawState;
+      const tasks = Array.isArray(importedState.tasks) ? importedState.tasks : null;
+      const workers = Array.isArray(importedState.workers) ? importedState.workers : null;
+      const schedules = importedState.schedules && typeof importedState.schedules === 'object'
+        ? importedState.schedules
+        : null;
+
+      if (!tasks || !workers || !schedules) {
+        throw new Error('O arquivo selecionado nao parece ser um backup desta aplicacao.');
+      }
+
+      return { tasks, workers, schedules };
+    }
+
+    async function importBackupFile(file) {
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const importedState = normalizeImportedState(JSON.parse(text));
+        const confirmed = confirm('Importar este backup vai substituir os dados atuais desta aplicacao neste navegador. Deseja continuar?');
+        if (!confirmed) return;
+        state = importedState;
+        saveState();
+        renderAll();
+        alert('Backup importado com sucesso.');
+      } catch (error) {
+        alert(error.message || 'Nao foi possivel importar o backup.');
+      } finally {
+        elements.backupFile.value = '';
+      }
+    }
+
+    function normalizeName(value) {
+      return value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('pt-BR');
+    }
+
+    function normalizeKey(value) {
+      return normalizeName(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function displayName(value) {
+      return value.trim().replace(/\s+/g, ' ');
+    }
+
+    function setMessage(target, text) {
+      target.textContent = text || '';
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function getScheduleKey() {
+      const month = Number(elements.startMonth.value);
+      const year = Number(elements.startYear.value);
+      return `${year}-${String(month + 1).padStart(2, '0')}`;
+    }
+
+    function getSundaysForTwoMonths(month, year) {
+      const dates = [];
+      for (let offset = 0; offset < 2; offset += 1) {
+        const activeMonth = (month + offset) % 12;
+        const activeYear = year + Math.floor((month + offset) / 12);
+        const lastDay = new Date(activeYear, activeMonth + 1, 0).getDate();
+
+        for (let day = 1; day <= lastDay; day += 1) {
+          const date = new Date(activeYear, activeMonth, day, 12);
+          if (date.getDay() === 0) {
+            dates.push(new Date(date));
+          }
+        }
+      }
+      return dates;
+    }
+
+    function dateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function shortDate(date) {
+      return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function setupMonthSelect() {
+      elements.startMonth.innerHTML = monthNames.map((name, index) => `<option value="${index}">${name}</option>`).join('');
+      const today = new Date();
+      elements.startMonth.value = today.getMonth();
+      elements.startYear.value = today.getFullYear();
+    }
+
+    function activateView(viewId) {
+      elements.tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.view === viewId));
+      elements.views.forEach(view => view.classList.toggle('active', view.id === viewId));
+    }
+
+    function setupTabs() {
+      elements.tabs.forEach(button => {
+        button.addEventListener('click', () => {
+          activateView(button.dataset.view);
+        });
+      });
+    }
+
+    function renderTasks() {
+      if (!state.tasks.length) {
+        elements.tasksTable.innerHTML = '<div class="empty">Nenhuma tarefa cadastrada.</div>';
+      } else {
+        elements.tasksTable.innerHTML = `
+          <table>
+            <thead><tr><th>Tarefa</th><th></th></tr></thead>
+            <tbody>
+              ${state.tasks.map(task => `
+                <tr>
+                  <td>${escapeHtml(task.name)}</td>
+                  <td>
+                    <div class="table-actions">
+                      <button class="icon-btn" type="button" title="Editar" data-edit-task="${task.id}">✎</button>
+                      <button class="icon-btn" type="button" title="Excluir" data-delete-task="${task.id}">×</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      elements.workerTaskOptions.innerHTML = state.tasks.length
+        ? state.tasks.map(task => `
+            <label class="check-row">
+              <input type="checkbox" value="${task.id}" />
+              <span>${escapeHtml(task.name)}</span>
+            </label>
+          `).join('')
+        : '<p class="help">Cadastre tarefas antes de marcar as habilidades dos obreiros.</p>';
+    }
+
+    function renderWorkers() {
+      const selectedTask = elements.workerFilterTask.value;
+      elements.workerFilterTask.innerHTML = `
+        <option value="">Todas as tarefas</option>
+        ${state.tasks.map(task => `<option value="${task.id}">${escapeHtml(task.name)}</option>`).join('')}
+      `;
+      if (state.tasks.some(task => task.id === selectedTask)) {
+        elements.workerFilterTask.value = selectedTask;
+      }
+
+      if (!state.workers.length) {
+        elements.workerResults.textContent = '0 obreiros';
+        elements.workersTable.innerHTML = '<div class="empty">Nenhum obreiro cadastrado.</div>';
+        return;
+      }
+
+      const nameFilter = normalizeName(elements.workerFilterName.value);
+      const taskFilter = elements.workerFilterTask.value;
+      const filteredWorkers = state.workers
+        .filter(worker => !nameFilter || normalizeName(worker.name).includes(nameFilter))
+        .filter(worker => !taskFilter || worker.taskIds.includes(taskFilter))
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+      elements.workerResults.textContent = filteredWorkers.length === state.workers.length
+        ? `${state.workers.length} obreiro${state.workers.length === 1 ? '' : 's'}`
+        : `${filteredWorkers.length} de ${state.workers.length} obreiros`;
+
+      if (!filteredWorkers.length) {
+        elements.workersTable.innerHTML = '<div class="empty">Nenhum obreiro encontrado com estes filtros.</div>';
+        return;
+      }
+
+      elements.workersTable.innerHTML = `
+        <table>
+          <thead><tr><th>Nome</th><th>Tarefas</th><th></th></tr></thead>
+          <tbody>
+            ${filteredWorkers.map(worker => {
+              const taskNames = worker.taskIds
+                .map(id => state.tasks.find(task => task.id === id)?.name)
+                .filter(Boolean);
+              return `
+                <tr>
+                  <td>${escapeHtml(worker.name)}</td>
+                  <td><div class="tag-list">${taskNames.map(name => `<span class="tag">${escapeHtml(name)}</span>`).join('') || '<span class="help">Sem tarefas</span>'}</div></td>
+                  <td>
+                    <div class="table-actions">
+                      <button class="icon-btn" type="button" title="Editar" data-edit-worker="${worker.id}">✎</button>
+                      <button class="icon-btn" type="button" title="Excluir" data-delete-worker="${worker.id}">×</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function resetTaskForm() {
+      elements.taskId.value = '';
+      elements.taskName.value = '';
+      setMessage(elements.taskMessage, '');
+    }
+
+    function resetWorkerForm() {
+      elements.workerId.value = '';
+      elements.workerName.value = '';
+      elements.workerTaskOptions.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        input.checked = false;
+      });
+      setMessage(elements.workerMessage, '');
+    }
+
+    function saveTask(event) {
+      event.preventDefault();
+      const name = displayName(elements.taskName.value);
+      const normalized = normalizeName(name);
+      const id = elements.taskId.value;
+
+      if (!name) {
+        setMessage(elements.taskMessage, 'Informe o nome da tarefa.');
+        return;
+      }
+
+      const duplicate = state.tasks.some(task => task.id !== id && normalizeName(task.name) === normalized);
+      if (duplicate) {
+        setMessage(elements.taskMessage, 'Esta tarefa ja esta cadastrada.');
+        return;
+      }
+
+      if (id) {
+        const task = state.tasks.find(item => item.id === id);
+        if (task) task.name = name;
+      } else {
+        state.tasks.push({ id: crypto.randomUUID(), name });
+      }
+
+      saveState();
+      resetTaskForm();
+      renderAll();
+    }
+
+    function deleteTask(id) {
+      const isUsed = state.workers.some(worker => worker.taskIds.includes(id));
+      const message = isUsed
+        ? 'Esta tarefa esta ligada a obreiros. Excluir mesmo assim?'
+        : 'Excluir esta tarefa?';
+      if (!confirm(message)) return;
+
+      state.tasks = state.tasks.filter(task => task.id !== id);
+      state.workers = state.workers.map(worker => ({
+        ...worker,
+        taskIds: worker.taskIds.filter(taskId => taskId !== id)
+      }));
+      Object.values(state.schedules).forEach(schedule => {
+        Object.keys(schedule).forEach(key => {
+          if (key.split('|')[1] === id) delete schedule[key];
+        });
+      });
+      saveState();
+      renderAll();
+    }
+
+    function editTask(id) {
+      const task = state.tasks.find(item => item.id === id);
+      if (!task) return;
+      elements.taskId.value = task.id;
+      elements.taskName.value = task.name;
+      elements.taskName.focus();
+    }
+
+    function saveWorker(event) {
+      event.preventDefault();
+      const id = elements.workerId.value;
+      const name = displayName(elements.workerName.value);
+      const selectedTaskIds = [...elements.workerTaskOptions.querySelectorAll('input[type="checkbox"]:checked')].map(input => input.value);
+
+      if (!name) {
+        setMessage(elements.workerMessage, 'Informe o nome completo.');
+        return;
+      }
+
+      if (!selectedTaskIds.length) {
+        setMessage(elements.workerMessage, 'Marque pelo menos uma tarefa para o obreiro.');
+        return;
+      }
+
+      const duplicate = state.workers.some(worker => worker.id !== id && normalizeName(worker.name) === normalizeName(name));
+      if (duplicate) {
+        setMessage(elements.workerMessage, 'Este nome ja esta cadastrado. Os nomes nao podem ser repetidos.');
+        return;
+      }
+
+      if (id) {
+        const worker = state.workers.find(item => item.id === id);
+        if (worker) {
+          worker.name = name;
+          worker.taskIds = selectedTaskIds;
+        }
+      } else {
+        state.workers.push({ id: crypto.randomUUID(), name, taskIds: selectedTaskIds });
+      }
+
+      saveState();
+      resetWorkerForm();
+      renderAll();
+    }
+
+    function editWorker(id) {
+      const worker = state.workers.find(item => item.id === id);
+      if (!worker) return;
+      elements.workerId.value = worker.id;
+      elements.workerName.value = worker.name;
+      elements.workerTaskOptions.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        input.checked = worker.taskIds.includes(input.value);
+      });
+      elements.workerName.focus();
+    }
+
+    function deleteWorker(id) {
+      if (!confirm('Excluir este obreiro?')) return;
+      state.workers = state.workers.filter(worker => worker.id !== id);
+      Object.values(state.schedules).forEach(schedule => {
+        Object.keys(schedule).forEach(key => {
+          if (schedule[key] === id) schedule[key] = '';
+        });
+      });
+      saveState();
+      renderAll();
+    }
+
+    function eligibleWorkers(taskId) {
+      return state.workers
+        .filter(worker => worker.taskIds.includes(taskId))
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    }
+
+    function shuffled(items) {
+      const result = [...items];
+      for (let index = result.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
+      }
+      return result;
+    }
+
+    function positiveModulo(value, divisor) {
+      return ((value % divisor) + divisor) % divisor;
+    }
+
+    function weeksFromMessageStart(date) {
+      const start = Date.UTC(2026, 6, 5);
+      const current = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+      return Math.round((current - start) / (7 * 24 * 60 * 60 * 1000));
+    }
+
+    function workerMatchesFirstName(worker, firstName) {
+      const workerName = normalizeKey(worker.name);
+      const expectedName = normalizeKey(firstName);
+      return workerName === expectedName || workerName.startsWith(`${expectedName} `);
+    }
+
+    function findWorkerByFirstName(firstName) {
+      return state.workers.find(worker => workerMatchesFirstName(worker, firstName));
+    }
+
+    function getJoaoPriority(worker) {
+      return workerMatchesFirstName(worker, 'João') ? 0 : 1;
+    }
+
+    function getTaskPriority(task) {
+      const priority = [
+        'mensagem',
+        'canticos',
+        'ceia',
+        'oferta',
+        'abertura',
+        'oracao final',
+        'avisos e pedidos'
+      ];
+      const index = priority.indexOf(normalizeKey(task.name));
+      return index === -1 ? priority.length : index;
+    }
+
+    function isOfferCountingTask(task) {
+      return normalizeKey(task.name) === 'contagem da oferta';
+    }
+
+    function getScheduleCellKeys(date, task) {
+      const baseKey = `${dateKey(date)}|${task.id}`;
+      return isOfferCountingTask(task) ? [baseKey, `${baseKey}|2`] : [baseKey];
+    }
+
+    function getScheduledWorkerIds(schedule, date, task) {
+      return getScheduleCellKeys(date, task)
+        .map(cellKey => schedule[cellKey])
+        .filter(Boolean);
+    }
+
+    function recordAssignment(worker, task, usedOnDate, assignedCount, assignedByTask, lastTaskByWorker) {
+      if (!worker) return;
+      const taskCounts = assignedByTask.get(task.id);
+      usedOnDate.add(worker.id);
+      assignedCount.set(worker.id, (assignedCount.get(worker.id) || 0) + 1);
+      taskCounts.set(worker.id, (taskCounts.get(worker.id) || 0) + 1);
+      lastTaskByWorker.set(worker.id, task.id);
+    }
+
+    function compareWorkersForTask(a, b, taskId, assignedCount, assignedByTask, lastTaskByWorker) {
+      const totalDifference = (assignedCount.get(a.id) || 0) - (assignedCount.get(b.id) || 0);
+      if (totalDifference) return totalDifference;
+
+      const repeatedTaskDifference =
+        (lastTaskByWorker.get(a.id) === taskId ? 1 : 0) -
+        (lastTaskByWorker.get(b.id) === taskId ? 1 : 0);
+      if (repeatedTaskDifference) return repeatedTaskDifference;
+
+      const taskCounts = assignedByTask.get(taskId);
+      const taskDifference = (taskCounts.get(a.id) || 0) - (taskCounts.get(b.id) || 0);
+      if (taskDifference) return taskDifference;
+
+      const joaoPriorityDifference = getJoaoPriority(a) - getJoaoPriority(b);
+      if (joaoPriorityDifference) return joaoPriorityDifference;
+
+      return a.name.localeCompare(b.name, 'pt-BR');
+    }
+
+    function generateSchedule() {
+      const key = getScheduleKey();
+      const month = Number(elements.startMonth.value);
+      const year = Number(elements.startYear.value);
+      const sundays = getSundaysForTwoMonths(month, year);
+      const schedule = {};
+      const assignedCount = new Map(state.workers.map(worker => [worker.id, 0]));
+      const assignedByTask = new Map(state.tasks.map(task => [
+        task.id,
+        new Map(state.workers.map(worker => [worker.id, 0]))
+      ]));
+      const lastTaskByWorker = new Map();
+      const messageSequence = ['marcos', 'joao', 'andre', 'anderson', 'donizeti', 'persio'];
+
+      sundays.forEach(date => {
+        const usedOnDate = new Set();
+        const tasksForDate = shuffled(state.tasks).sort((a, b) =>
+          getTaskPriority(a) - getTaskPriority(b)
+        );
+
+        tasksForDate.forEach(task => {
+          const taskCounts = assignedByTask.get(task.id);
+          const eligible = eligibleWorkers(task.id);
+          const taskName = normalizeKey(task.name);
+          let chosen;
+
+          if (taskName === 'mensagem') {
+            const sequenceIndex = positiveModulo(weeksFromMessageStart(date), messageSequence.length);
+            const expectedName = messageSequence[sequenceIndex];
+            chosen = findWorkerByFirstName(expectedName);
+          }
+
+          if (!chosen && taskName === 'canticos' && eligible.length) {
+            const alternatingIndex = positiveModulo(weeksFromMessageStart(date), eligible.length);
+            const preferredSinger = eligible[alternatingIndex];
+            chosen = !usedOnDate.has(preferredSinger.id)
+              ? preferredSinger
+              : eligible.find(worker => !usedOnDate.has(worker.id));
+          }
+
+          if (!chosen) {
+            const candidates = eligible
+              .filter(worker => !usedOnDate.has(worker.id))
+              .sort((a, b) =>
+                compareWorkersForTask(a, b, task.id, assignedCount, assignedByTask, lastTaskByWorker)
+              );
+            chosen = candidates[0];
+          }
+
+          if (!chosen) {
+            chosen = eligible
+              .sort((a, b) =>
+                compareWorkersForTask(a, b, task.id, assignedCount, assignedByTask, lastTaskByWorker)
+              )[0];
+          }
+
+          if (!chosen) {
+            const emergencyCandidates = state.workers
+              .filter(worker => !usedOnDate.has(worker.id))
+              .sort((a, b) =>
+                compareWorkersForTask(a, b, task.id, assignedCount, assignedByTask, lastTaskByWorker)
+              );
+            const repeatedCandidates = [...state.workers].sort((a, b) =>
+              compareWorkersForTask(a, b, task.id, assignedCount, assignedByTask, lastTaskByWorker)
+            );
+            chosen = emergencyCandidates[0] || repeatedCandidates[0];
+          }
+
+          const cellKey = `${dateKey(date)}|${task.id}`;
+          schedule[cellKey] = chosen ? chosen.id : '';
+          recordAssignment(chosen, task, usedOnDate, assignedCount, assignedByTask, lastTaskByWorker);
+
+          if (isOfferCountingTask(task)) {
+            const secondEligible = eligible
+              .filter(worker => !usedOnDate.has(worker.id))
+              .sort((a, b) =>
+                compareWorkersForTask(a, b, task.id, assignedCount, assignedByTask, lastTaskByWorker)
+              );
+            const secondEmergency = state.workers
+              .filter(worker => !usedOnDate.has(worker.id))
+              .sort((a, b) =>
+                compareWorkersForTask(a, b, task.id, assignedCount, assignedByTask, lastTaskByWorker)
+              );
+            const secondRepeated = [...state.workers]
+              .filter(worker => worker.id !== chosen?.id)
+              .sort((a, b) =>
+                compareWorkersForTask(a, b, task.id, assignedCount, assignedByTask, lastTaskByWorker)
+              );
+            const secondChosen = secondEligible[0] || secondEmergency[0] || secondRepeated[0] || chosen;
+            schedule[`${cellKey}|2`] = secondChosen ? secondChosen.id : '';
+            recordAssignment(secondChosen, task, usedOnDate, assignedCount, assignedByTask, lastTaskByWorker);
+          }
+        });
+      });
+
+      state.schedules[key] = schedule;
+      saveState();
+      renderSchedule();
+    }
+
+    function clearSchedule() {
+      if (!confirm('Limpar as escolhas deste bimestre?')) return;
+      state.schedules[getScheduleKey()] = {};
+      saveState();
+      renderSchedule();
+    }
+
+    function getWorkerName(workerId) {
+      return state.workers.find(worker => worker.id === workerId)?.name || '';
+    }
+
+    function escapeXml(value) {
+      return String(value).replace(/[<>&'"]/g, character => ({
+        '<': '&lt;',
+        '>': '&gt;',
+        '&': '&amp;',
+        "'": '&apos;',
+        '"': '&quot;'
+      }[character]));
+    }
+
+    function excelColumnName(index) {
+      let value = index + 1;
+      let name = '';
+      while (value > 0) {
+        value -= 1;
+        name = String.fromCharCode(65 + (value % 26)) + name;
+        value = Math.floor(value / 26);
+      }
+      return name;
+    }
+
+    function crc32(bytes) {
+      let crc = 0xffffffff;
+      for (const byte of bytes) {
+        crc ^= byte;
+        for (let bit = 0; bit < 8; bit += 1) {
+          crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+        }
+      }
+      return (crc ^ 0xffffffff) >>> 0;
+    }
+
+    function createZipBlob(files) {
+      const encoder = new TextEncoder();
+      const localParts = [];
+      const centralParts = [];
+      let offset = 0;
+
+      function uint16(value) {
+        return new Uint8Array([value & 255, (value >>> 8) & 255]);
+      }
+
+      function uint32(value) {
+        return new Uint8Array([
+          value & 255,
+          (value >>> 8) & 255,
+          (value >>> 16) & 255,
+          (value >>> 24) & 255
+        ]);
+      }
+
+      files.forEach(file => {
+        const name = encoder.encode(file.name);
+        const data = typeof file.content === 'string' ? encoder.encode(file.content) : file.content;
+        const checksum = crc32(data);
+        const localHeader = new Uint8Array([
+          ...uint32(0x04034b50),
+          ...uint16(20),
+          ...uint16(0x0800),
+          ...uint16(0),
+          ...uint16(0),
+          ...uint16(0),
+          ...uint32(checksum),
+          ...uint32(data.length),
+          ...uint32(data.length),
+          ...uint16(name.length),
+          ...uint16(0),
+          ...name
+        ]);
+        localParts.push(localHeader, data);
+
+        const centralHeader = new Uint8Array([
+          ...uint32(0x02014b50),
+          ...uint16(20),
+          ...uint16(20),
+          ...uint16(0x0800),
+          ...uint16(0),
+          ...uint16(0),
+          ...uint16(0),
+          ...uint32(checksum),
+          ...uint32(data.length),
+          ...uint32(data.length),
+          ...uint16(name.length),
+          ...uint16(0),
+          ...uint16(0),
+          ...uint16(0),
+          ...uint16(0),
+          ...uint32(0),
+          ...uint32(offset),
+          ...name
+        ]);
+        centralParts.push(centralHeader);
+        offset += localHeader.length + data.length;
+      });
+
+      const centralSize = centralParts.reduce((total, part) => total + part.length, 0);
+      const endRecord = new Uint8Array([
+        ...uint32(0x06054b50),
+        ...uint16(0),
+        ...uint16(0),
+        ...uint16(files.length),
+        ...uint16(files.length),
+        ...uint32(centralSize),
+        ...uint32(offset),
+        ...uint16(0)
+      ]);
+      return new Blob([...localParts, ...centralParts, endRecord], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+    }
+
+    function exportScheduleToExcel() {
+      const month = Number(elements.startMonth.value);
+      const year = Number(elements.startYear.value);
+      const sundays = getSundaysForTwoMonths(month, year);
+      const schedule = state.schedules[getScheduleKey()] || {};
+      const nextMonth = (month + 1) % 12;
+      const nextYear = year + Math.floor((month + 1) / 12);
+      const periodLabel = nextYear === year
+        ? `${monthNames[month]} e ${monthNames[nextMonth]} de ${year}`
+        : `${monthNames[month]} de ${year} e ${monthNames[nextMonth]} de ${nextYear}`;
+      const tableData = [
+        ['Atividade', ...sundays.map(shortDate)],
+        ...state.tasks.map(task => [
+          task.name,
+          ...sundays.map(date => {
+            const names = getScheduledWorkerIds(schedule, date, task)
+              .map(getWorkerName)
+              .filter(Boolean);
+            return names.length ? names.join('\n') : 'Em aberto';
+          })
+        ])
+      ];
+      const lastColumn = excelColumnName(tableData[0].length - 1);
+      const tableStartRow = 4;
+      const lastRow = tableStartRow + tableData.length - 1;
+      const sheetRows = tableData.map((row, rowIndex) => {
+        const excelRow = tableStartRow + rowIndex;
+        const cells = row.map((value, columnIndex) => {
+          const reference = `${excelColumnName(columnIndex)}${excelRow}`;
+          const isMessageRow = rowIndex > 0 && row[0] === 'Mensagem';
+          const style = rowIndex === 0
+            ? 1
+            : isMessageRow
+              ? (columnIndex === 0 ? 8 : 9)
+              : columnIndex === 0
+                ? (rowIndex % 2 === 0 ? 7 : 6)
+                : (rowIndex % 2 === 0 ? 3 : 2);
+          return `<c r="${reference}" s="${style}" t="inlineStr"><is><t xml:space="preserve">${escapeXml(value)}</t></is></c>`;
+        }).join('');
+        return `<row r="${excelRow}" ht="${rowIndex === 0 ? 28 : 34}" customHeight="1">${cells}</row>`;
+      }).join('');
+      const headingRows = `
+        <row r="1" ht="30" customHeight="1"><c r="A1" s="4" t="inlineStr"><is><t>Escala do Culto</t></is></c></row>
+        <row r="2" ht="22" customHeight="1"><c r="A2" s="5" t="inlineStr"><is><t xml:space="preserve">${escapeXml(`Igreja de Cristo em Atibaia - ${periodLabel}`)}</t></is></c></row>
+        <row r="3" ht="8" customHeight="1"/>
+      `;
+      const columns = tableData[0].map((_, index) =>
+        `<col min="${index + 1}" max="${index + 1}" width="${index === 0 ? 24 : 20}" customWidth="1"/>`
+      ).join('');
+      const worksheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+          xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+          <sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane ySplit="4" topLeftCell="A5" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+          <cols>${columns}</cols>
+          <sheetData>${headingRows}${sheetRows}</sheetData>
+          <autoFilter ref="A${tableStartRow}:${lastColumn}${lastRow}"/>
+          <mergeCells count="2"><mergeCell ref="A1:${lastColumn}1"/><mergeCell ref="A2:${lastColumn}2"/></mergeCells>
+        </worksheet>`;
+      const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+          <fonts count="5">
+            <font><sz val="11"/><name val="Calibri"/></font>
+            <font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Calibri"/></font>
+            <font><b/><color rgb="FF17365D"/><sz val="20"/><name val="Calibri"/></font>
+            <font><color rgb="FF64748B"/><sz val="11"/><name val="Calibri"/></font>
+            <font><b/><sz val="11"/><name val="Calibri"/></font>
+          </fonts>
+          <fills count="6">
+            <fill><patternFill patternType="none"/></fill>
+            <fill><patternFill patternType="gray125"/></fill>
+            <fill><patternFill patternType="solid"><fgColor rgb="FF17365D"/><bgColor indexed="64"/></patternFill></fill>
+            <fill><patternFill patternType="solid"><fgColor rgb="FFFFFFFF"/><bgColor indexed="64"/></patternFill></fill>
+            <fill><patternFill patternType="solid"><fgColor rgb="FFE7E9ED"/><bgColor indexed="64"/></patternFill></fill>
+            <fill><patternFill patternType="solid"><fgColor rgb="FFD6EAF3"/><bgColor indexed="64"/></patternFill></fill>
+          </fills>
+          <borders count="2">
+            <border><left/><right/><top/><bottom/><diagonal/></border>
+            <border><left style="thin"><color rgb="FFD7DCE3"/></left><right style="thin"><color rgb="FFD7DCE3"/></right><top style="thin"><color rgb="FFD7DCE3"/></top><bottom style="thin"><color rgb="FFD7DCE3"/></bottom><diagonal/></border>
+          </borders>
+          <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+          <cellXfs count="10">
+            <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+            <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+            <xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+            <xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+            <xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+            <xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+            <xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+            <xf numFmtId="0" fontId="4" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+            <xf numFmtId="0" fontId="4" fillId="5" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+            <xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
+          </cellXfs>
+          <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+        </styleSheet>`;
+      const files = [
+        { name: '[Content_Types].xml', content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>` },
+        { name: '_rels/.rels', content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+        { name: 'xl/workbook.xml', content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Escala do Culto" sheetId="1" r:id="rId1"/></sheets></workbook>` },
+        { name: 'xl/_rels/workbook.xml.rels', content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>` },
+        { name: 'xl/worksheets/sheet1.xml', content: worksheet },
+        { name: 'xl/styles.xml', content: styles }
+      ];
+      const url = URL.createObjectURL(createZipBlob(files));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `escala-culto-${getScheduleKey()}.xlsx`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        link.remove();
+        URL.revokeObjectURL(url);
+      }, 1000);
+    }
+
+    function updateScheduleCell(cellKey, workerId) {
+      const key = getScheduleKey();
+      state.schedules[key] = state.schedules[key] || {};
+      const [selectedDate] = cellKey.split('|');
+      const alreadyAssigned = workerId && Object.entries(state.schedules[key]).some(([otherCellKey, otherWorkerId]) =>
+        otherCellKey !== cellKey &&
+        otherCellKey.startsWith(`${selectedDate}|`) &&
+        otherWorkerId === workerId
+      );
+
+      if (alreadyAssigned) {
+        alert('Este obreiro já está escalado para outra atividade neste domingo.');
+        renderSchedule();
+        return;
+      }
+
+      state.schedules[key][cellKey] = workerId;
+      saveState();
+      renderSchedule();
+    }
+
+    function renderScheduleFilters() {
+      const selectedWorker = elements.scheduleFilterWorker.value;
+      const selectedTask = elements.scheduleFilterTask.value;
+
+      elements.scheduleFilterWorker.innerHTML = `
+        <option value="">Todos os obreiros</option>
+        ${[...state.workers]
+          .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+          .map(worker => `<option value="${worker.id}">${escapeHtml(worker.name)}</option>`)
+          .join('')}
+      `;
+      elements.scheduleFilterTask.innerHTML = `
+        <option value="">Todas as tarefas</option>
+        ${state.tasks
+          .map(task => `<option value="${task.id}">${escapeHtml(task.name)}</option>`)
+          .join('')}
+      `;
+
+      if (state.workers.some(worker => worker.id === selectedWorker)) {
+        elements.scheduleFilterWorker.value = selectedWorker;
+      }
+      if (state.tasks.some(task => task.id === selectedTask)) {
+        elements.scheduleFilterTask.value = selectedTask;
+      }
+    }
+
+    function renderSchedule() {
+      const month = Number(elements.startMonth.value);
+      const year = Number(elements.startYear.value);
+      const sundays = getSundaysForTwoMonths(month, year);
+      const schedule = state.schedules[getScheduleKey()] || {};
+      let removedLegacyOfferAssignments = false;
+      state.tasks
+        .filter(task => normalizeKey(task.name) === 'oferta')
+        .forEach(task => {
+          sundays.forEach(date => {
+            const legacyKey = `${dateKey(date)}|${task.id}|2`;
+            if (legacyKey in schedule) {
+              delete schedule[legacyKey];
+              removedLegacyOfferAssignments = true;
+            }
+          });
+        });
+      if (removedLegacyOfferAssignments) saveState();
+      renderScheduleFilters();
+
+      if (!state.tasks.length) {
+        elements.scheduleContainer.innerHTML = '<div class="empty">Cadastre tarefas para montar a escala.</div>';
+        return;
+      }
+
+      const workerFilter = elements.scheduleFilterWorker.value;
+      const taskFilter = elements.scheduleFilterTask.value;
+      const visibleTasks = state.tasks.filter(task => {
+        if (taskFilter && task.id !== taskFilter) return false;
+        if (!workerFilter) return true;
+        return sundays.some(date => getScheduledWorkerIds(schedule, date, task).includes(workerFilter));
+      });
+
+      if (!visibleTasks.length) {
+        elements.scheduleContainer.innerHTML = '<div class="empty">Nenhuma escala encontrada com estes filtros.</div>';
+        return;
+      }
+
+      const rows = visibleTasks.map(task => `
+        <tr>
+          <td class="task-name">${escapeHtml(task.name)}</td>
+          ${sundays.map(date => {
+            const cellKeys = getScheduleCellKeys(date, task);
+            const selectedWorkerIds = cellKeys
+              .map(cellKey => schedule[cellKey])
+              .filter(Boolean);
+            const selectedOnDate = Object.entries(schedule)
+              .filter(([cellKey, workerId]) => cellKey.startsWith(`${dateKey(date)}|`) && workerId)
+              .map(([, workerId]) => workerId);
+            const duplicateOnDate = selectedWorkerIds.some(workerId =>
+              selectedOnDate.filter(id => id === workerId).length > 1
+            );
+            const eligible = eligibleWorkers(task.id);
+            const selects = cellKeys.map((cellKey, index) => {
+              const selectedWorkerId = schedule[cellKey] || '';
+              const selectedWorker = state.workers.find(worker => worker.id === selectedWorkerId);
+              const selectableWorkers = selectedWorker && !eligible.some(worker => worker.id === selectedWorker.id)
+                ? [selectedWorker, ...eligible]
+                : eligible;
+              const options = selectableWorkers.map(worker => {
+                const disabled = selectedWorkerId !== worker.id && selectedOnDate.includes(worker.id);
+                const exceptionalSupport = !worker.taskIds.includes(task.id) ? ' (apoio excepcional)' : '';
+                return `<option value="${worker.id}" ${selectedWorkerId === worker.id ? 'selected' : ''} ${disabled ? 'disabled' : ''}>${escapeHtml(worker.name)}${exceptionalSupport}</option>`;
+              }).join('');
+              const positionLabel = cellKeys.length > 1 ? ` - pessoa ${index + 1}` : '';
+              return `
+                <select data-cell="${cellKey}" aria-label="${escapeHtml(task.name)} em ${shortDate(date)}${positionLabel}">
+                  <option value="">Em aberto</option>
+                  ${options}
+                </select>
+              `;
+            }).join('');
+            const cellClasses = [
+              'schedule-cell',
+              selectedWorkerIds.length ? 'filled' : 'empty-cell',
+              duplicateOnDate ? 'conflict' : '',
+              workerFilter && selectedWorkerIds.includes(workerFilter) ? 'filter-match' : '',
+              workerFilter && !selectedWorkerIds.includes(workerFilter) ? 'filter-muted' : ''
+            ].filter(Boolean).join(' ');
+            return `
+              <td class="${cellClasses}">
+                <div class="assignment-stack">${selects}</div>
+              </td>
+            `;
+          }).join('')}
+        </tr>
+      `).join('');
+
+      elements.scheduleContainer.innerHTML = `
+        <table class="schedule">
+          <thead>
+            <tr>
+              <th>Atividade</th>
+              ${sundays.map(date => `<th>Domingo<br>${shortDate(date)}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function renderAll() {
+      renderTasks();
+      renderWorkers();
+      renderSchedule();
+    }
+
+    elements.taskForm.addEventListener('submit', saveTask);
+    elements.workerForm.addEventListener('submit', saveWorker);
+    elements.cancelTaskEdit.addEventListener('click', resetTaskForm);
+    elements.cancelWorkerEdit.addEventListener('click', resetWorkerForm);
+    elements.generateSchedule.addEventListener('click', generateSchedule);
+    elements.exportSchedule.addEventListener('click', exportScheduleToExcel);
+    elements.exportBackup.addEventListener('click', exportBackup);
+    elements.importBackup.addEventListener('click', () => elements.backupFile.click());
+    elements.backupFile.addEventListener('change', event => importBackupFile(event.target.files[0]));
+    elements.clearSchedule.addEventListener('click', clearSchedule);
+    elements.startMonth.addEventListener('change', renderSchedule);
+    elements.startYear.addEventListener('change', renderSchedule);
+    elements.scheduleFilterWorker.addEventListener('change', renderSchedule);
+    elements.scheduleFilterTask.addEventListener('change', renderSchedule);
+    elements.workerFilterName.addEventListener('input', renderWorkers);
+    elements.workerFilterTask.addEventListener('change', renderWorkers);
+
+    document.addEventListener('click', event => {
+      const editTaskId = event.target.dataset.editTask;
+      const deleteTaskId = event.target.dataset.deleteTask;
+      const editWorkerId = event.target.dataset.editWorker;
+      const deleteWorkerId = event.target.dataset.deleteWorker;
+      const viewId = event.target.dataset.view;
+
+      if (viewId) activateView(viewId);
+      if (editTaskId) editTask(editTaskId);
+      if (deleteTaskId) deleteTask(deleteTaskId);
+      if (editWorkerId) editWorker(editWorkerId);
+      if (deleteWorkerId) deleteWorker(deleteWorkerId);
+    });
+
+    elements.scheduleContainer.addEventListener('change', event => {
+      if (event.target.matches('select[data-cell]')) {
+        updateScheduleCell(event.target.dataset.cell, event.target.value);
+      }
+    });
+
+    setupTabs();
+    setupMonthSelect();
+    renderAll();
+  </script>
+</body>
+</html>
