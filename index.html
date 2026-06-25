@@ -3,6 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#258fd0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Escala Culto" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
   <title>Escala do Culto - Igreja de Cristo em Atibaia</title>
   <style>
     :root {
@@ -1347,6 +1354,15 @@
       });
     }
 
+    function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').catch(error => {
+          console.warn('Nao foi possivel registrar o service worker.', error);
+        });
+      });
+    }
+
     function renderTasks() {
       if (!state.tasks.length) {
         elements.tasksTable.innerHTML = '<div class="empty">Nenhuma tarefa cadastrada.</div>';
@@ -2344,6 +2360,7 @@
     setupTabs();
     setupMonthSelect();
     renderAll();
+    registerServiceWorker();
     initCloudSync();
   </script>
 </body>
