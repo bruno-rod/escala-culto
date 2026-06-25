@@ -765,6 +765,13 @@
       font-size: 13px;
     }
 
+    .sync-status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     @media (max-width: 800px) {
       .topbar {
         align-items: stretch;
@@ -889,6 +896,7 @@
               </div>
               <input id="backupFile" type="file" accept="application/json,.json" hidden />
             </details>
+            <p class="sync-status" id="cloudStatus">Dados locais</p>
           </div>
         </div>
 
@@ -993,8 +1001,18 @@
     </main>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
     const STORAGE_KEY = 'ica_escala_culto_v1';
+    const firebaseConfig = {
+      apiKey: "AIzaSyABPkhbPdmgySR_mCY6ZpepAdjCD4SPSyM",
+      authDomain: "escala-do-culto.firebaseapp.com",
+      projectId: "escala-do-culto",
+      storageBucket: "escala-do-culto.firebasestorage.app",
+      messagingSenderId: "94662027012",
+      appId: "1:94662027012:web:65f8075b99cb2aacc85251"
+    };
     const monthNames = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
     const defaultState = {
@@ -1012,6 +1030,9 @@
     let selectedWorkerId = '';
     let expandedWorkerId = '';
     let workerSort = { field: 'code', direction: 'asc' };
+    let cloudStateRef = null;
+    let cloudSaveTimer = null;
+    let isApplyingRemoteState = false;
 
     const elements = {
       tabs: document.querySelectorAll('.tab-button'),
@@ -1049,7 +1070,8 @@
       importBackup: document.getElementById('importBackup'),
       backupFile: document.getElementById('backupFile'),
       clearSchedule: document.getElementById('clearSchedule'),
-      scheduleContainer: document.getElementById('scheduleContainer')
+      scheduleContainer: document.getElementById('scheduleContainer'),
+      cloudStatus: document.getElementById('cloudStatus')
     };
 
     function loadState() {
@@ -1057,11 +1079,7 @@
       if (!saved) return defaultState;
       try {
         const parsed = JSON.parse(saved);
-        return {
-          tasks: Array.isArray(parsed.tasks) ? parsed.tasks : defaultState.tasks,
-          workers: normalizeWorkers(Array.isArray(parsed.workers) ? parsed.workers : []),
-          schedules: parsed.schedules && typeof parsed.schedules === 'object' ? parsed.schedules : {}
-        };
+        return normalizeState(parsed);
       } catch {
         return defaultState;
       }
@@ -1069,6 +1087,22 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!isApplyingRemoteState) scheduleCloudSave();
+    }
+
+    function normalizeState(rawState) {
+      const stateToNormalize = rawState && typeof rawState === 'object' ? rawState : {};
+      return {
+        tasks: Array.isArray(stateToNormalize.tasks) ? stateToNormalize.tasks : defaultState.tasks,
+        workers: normalizeWorkers(Array.isArray(stateToNormalize.workers) ? stateToNormalize.workers : []),
+        schedules: stateToNormalize.schedules && typeof stateToNormalize.schedules === 'object'
+          ? stateToNormalize.schedules
+          : {}
+      };
+    }
+
+    function setCloudStatus(text) {
+      if (elements.cloudStatus) elements.cloudStatus.textContent = text;
     }
 
     function exportBackup() {
@@ -1109,7 +1143,7 @@
         throw new Error('O arquivo selecionado nao parece ser um backup desta aplicacao.');
       }
 
-      return { tasks, workers, schedules };
+      return normalizeState({ tasks, workers, schedules });
     }
 
     function normalizeWorkers(workers) {
@@ -1135,6 +1169,71 @@
         alert(error.message || 'Nao foi possivel importar o backup.');
       } finally {
         elements.backupFile.value = '';
+      }
+    }
+
+    function scheduleCloudSave() {
+      if (!cloudStateRef) return;
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(() => saveStateToCloud(), 500);
+    }
+
+    async function saveStateToCloud() {
+      if (!cloudStateRef) return;
+      try {
+        setCloudStatus('Salvando na nuvem...');
+        await cloudStateRef.set({
+          state: JSON.parse(JSON.stringify(state)),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        setCloudStatus('Sincronizado na nuvem');
+      } catch (error) {
+        console.error(error);
+        setCloudStatus('Modo local - falha ao salvar na nuvem');
+      }
+    }
+
+    function applyRemoteState(remoteState) {
+      const normalized = normalizeState(remoteState);
+      if (JSON.stringify(normalized) === JSON.stringify(state)) return;
+      isApplyingRemoteState = true;
+      state = normalized;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderAll();
+      isApplyingRemoteState = false;
+    }
+
+    async function initCloudSync() {
+      if (!window.firebase?.initializeApp || !window.firebase?.firestore) {
+        setCloudStatus('Modo local - Firebase indisponivel');
+        return;
+      }
+
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        cloudStateRef = firebase.firestore().collection('escalaCulto').doc('atibaia');
+        setCloudStatus('Conectando com a nuvem...');
+
+        const snapshot = await cloudStateRef.get();
+        if (snapshot.exists && snapshot.data()?.state) {
+          applyRemoteState(snapshot.data().state);
+          setCloudStatus('Dados carregados da nuvem');
+        } else {
+          await saveStateToCloud();
+        }
+
+        cloudStateRef.onSnapshot(snapshot => {
+          if (snapshot.exists && snapshot.data()?.state) {
+            applyRemoteState(snapshot.data().state);
+            setCloudStatus('Sincronizado na nuvem');
+          }
+        }, error => {
+          console.error(error);
+          setCloudStatus('Modo local - falha ao ouvir nuvem');
+        });
+      } catch (error) {
+        console.error(error);
+        setCloudStatus('Modo local - confira o Firestore');
       }
     }
 
@@ -2245,6 +2344,7 @@
     setupTabs();
     setupMonthSelect();
     renderAll();
+    initCloudSync();
   </script>
 </body>
 </html>
