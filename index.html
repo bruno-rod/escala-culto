@@ -1902,7 +1902,10 @@
           let chosen;
 
           if (taskName === 'mensagem') {
-            const sequenceIndex = positiveModulo(weeksFromMessageStart(date), messageSequence.length);
+            const messageStart = Date.UTC(2026, 10, 1);
+            const messageDate = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+            const messageWeek = Math.round((messageDate - messageStart) / (7 * 24 * 60 * 60 * 1000));
+            const sequenceIndex = positiveModulo(messageWeek + 4, messageSequence.length);
             const expectedName = messageSequence[sequenceIndex];
             chosen = findWorkerByFirstName(expectedName);
           }
