@@ -1887,6 +1887,7 @@
         new Map(availableWorkers.map(worker => [worker.id, 0]))
       ]));
       const lastTaskByWorker = new Map();
+      let lastSingerId = '';
       const messageSequence = ['marcos', 'joao', 'andre', 'anderson', 'persio'];
 
       sundays.forEach(date => {
@@ -1911,11 +1912,15 @@
           }
 
           if (!chosen && taskName === 'canticos' && eligible.length) {
-            const alternatingIndex = positiveModulo(weeksFromMessageStart(date), eligible.length);
-            const preferredSinger = eligible[alternatingIndex];
-            chosen = !usedOnDate.has(preferredSinger.id)
-              ? preferredSinger
-              : eligible.find(worker => !usedOnDate.has(worker.id));
+            const availableSingers = eligible.filter(worker => !usedOnDate.has(worker.id));
+            chosen = availableSingers.sort((a, b) => {
+              const singingDifference = (taskCounts.get(a.id) || 0) - (taskCounts.get(b.id) || 0);
+              if (singingDifference) return singingDifference;
+              const consecutiveDifference = Number(a.id === lastSingerId) - Number(b.id === lastSingerId);
+              if (consecutiveDifference) return consecutiveDifference;
+              const totalDifference = (assignedCount.get(a.id) || 0) - (assignedCount.get(b.id) || 0);
+              return totalDifference || a.name.localeCompare(b.name, 'pt-BR');
+            })[0];
           }
 
           if (!chosen) {
@@ -1949,6 +1954,7 @@
           const cellKey = `${dateKey(date)}|${task.id}`;
           schedule[cellKey] = chosen ? chosen.id : '';
           recordAssignment(chosen, task, usedOnDate, assignedCount, assignedByTask, lastTaskByWorker);
+          if (taskName === 'canticos' && chosen) lastSingerId = chosen.id;
 
           if (isOfferCountingTask(task)) {
             const secondEligible = eligible
