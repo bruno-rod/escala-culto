@@ -1267,7 +1267,9 @@
         const snapshot = await cloudStateRef.get({ source: 'server' });
         if (generation !== authGeneration) return;
         const remoteState = snapshot.exists && snapshot.data()?.state;
-        if (remoteState && JSON.stringify(normalizeState(remoteState)) === JSON.stringify(state)) {
+        if (remoteState) {
+          archiveLocalState();
+          applyRemoteState(remoteState);
           syncReady = true;
           listenToCloud(generation);
           setCloudStatus('Sincronizado na nuvem');
