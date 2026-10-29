@@ -903,7 +903,13 @@
               </div>
               <input id="backupFile" type="file" accept="application/json,.json" hidden />
             </details>
-            <p class="sync-status" id="cloudStatus">Dados locais</p>
+            <div class="actions"><button class="secondary" id="googleLogin" type="button">Entrar com Google</button><button class="ghost" id="googleLogout" type="button" hidden>Sair</button></div>
+            <p class="sync-status" id="loginStatus" aria-live="polite">Entre para sincronizar entre seus aparelhos.</p>
+            <div id="syncChoice" class="backup-actions" hidden>
+              <p id="syncChoiceText" class="help"></p>
+              <div class="actions"><button class="secondary" id="useCloud" type="button">Usar dados da nuvem</button><button class="secondary" id="useLocal" type="button">Enviar dados deste aparelho</button></div>
+            </div>
+            <p class="sync-status" id="cloudStatus" aria-live="polite">Dados locais</p>
           </div>
         </div>
 
@@ -1010,6 +1016,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script>
     const STORAGE_KEY = 'ica_escala_culto_v1';
     const firebaseConfig = {
@@ -1040,6 +1047,10 @@
     let cloudStateRef = null;
     let cloudSaveTimer = null;
     let isApplyingRemoteState = false;
+    let unsubscribeCloud = null;
+    let syncReady = false;
+    let authGeneration = 0;
+    const OWNER_EMAIL = 'brunofpj@gmail.com';
 
     const elements = {
       tabs: document.querySelectorAll('.tab-button'),
@@ -1210,38 +1221,122 @@
       isApplyingRemoteState = false;
     }
 
-    async function initCloudSync() {
-      if (!window.firebase?.initializeApp || !window.firebase?.firestore) {
-        setCloudStatus('Modo local - Firebase indisponivel');
+    function cloudError(error) {
+      console.error(error);
+      syncReady = false;
+      setCloudStatus(error.code === 'permission-denied'
+        ? 'Dados locais preservados. Acesso negado: confira as regras do Firestore.'
+        : 'Dados locais preservados. Não foi possível conectar à nuvem.');
+    }
+
+    function archiveLocalState() {
+      localStorage.setItem(STORAGE_KEY + '_before_sync_' + Date.now(), JSON.stringify(state));
+    }
+
+    function listenToCloud(generation) {
+      unsubscribeCloud = cloudStateRef.onSnapshot(snapshot => {
+        if (generation !== authGeneration || !syncReady) return;
+        if (snapshot.metadata.hasPendingWrites) return;
+        if (snapshot.exists && snapshot.data()?.state) {
+          archiveLocalState();
+          applyRemoteState(snapshot.data().state);
+          setCloudStatus('Sincronizado na nuvem');
+        }
+      }, error => { if (generation === authGeneration) cloudError(error); });
+    }
+
+    async function connectAccount(user) {
+      const generation = ++authGeneration;
+      clearTimeout(cloudSaveTimer);
+      if (unsubscribeCloud) unsubscribeCloud();
+      unsubscribeCloud = null;
+      cloudStateRef = null;
+      syncReady = false;
+      document.getElementById('syncChoice').hidden = true;
+      document.getElementById('googleLogin').hidden = Boolean(user);
+      document.getElementById('googleLogout').hidden = !user;
+      document.getElementById('loginStatus').textContent = user ? 'Conectado: ' + user.email : 'Entre para sincronizar entre seus aparelhos.';
+      if (!user) { setCloudStatus('Dados locais — entre com Google para sincronizar'); return; }
+      if (user.email !== OWNER_EMAIL || !user.emailVerified) {
+        setCloudStatus('Esta conta não tem acesso à escala. Entre com a conta autorizada.');
         return;
       }
-
+      cloudStateRef = firebase.firestore().collection('escalaCulto').doc('atibaia');
+      setCloudStatus('Verificando dados da nuvem...');
       try {
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        cloudStateRef = firebase.firestore().collection('escalaCulto').doc('atibaia');
-        setCloudStatus('Conectando com a nuvem...');
-
-        const snapshot = await cloudStateRef.get();
-        if (snapshot.exists && snapshot.data()?.state) {
-          applyRemoteState(snapshot.data().state);
-          setCloudStatus('Dados carregados da nuvem');
-        } else {
-          await saveStateToCloud();
+        const snapshot = await cloudStateRef.get({ source: 'server' });
+        if (generation !== authGeneration) return;
+        const remoteState = snapshot.exists && snapshot.data()?.state;
+        if (remoteState && JSON.stringify(normalizeState(remoteState)) === JSON.stringify(state)) {
+          syncReady = true;
+          listenToCloud(generation);
+          setCloudStatus('Sincronizado na nuvem');
+          return;
         }
+        const panel = document.getElementById('syncChoice');
+        panel.hidden = false;
+        document.getElementById('syncChoiceText').textContent = remoteState
+          ? 'Os dados deste aparelho diferem dos da nuvem. Exporte um backup antes de escolher. Enviar os dados deste aparelho substituirá os dados compartilhados.'
+          : 'A nuvem ainda não contém dados. Importe o backup mais completo neste aparelho antes de enviá-lo.';
+        document.getElementById('useCloud').hidden = !remoteState;
+        setCloudStatus('Aguardando sua escolha — dados locais preservados');
+        document.getElementById('useCloud').onclick = async () => {
+          if (generation !== authGeneration) return;
+          if (!confirm('Substituir os dados deste aparelho pelos dados da nuvem? Guarde seu backup antes de continuar.')) return;
+          try {
+            const latest = await cloudStateRef.get({ source: 'server' });
+            if (generation !== authGeneration) return;
+            if (!latest.exists || !latest.data()?.state) throw new Error('Dados indisponíveis');
+            archiveLocalState();
+            applyRemoteState(latest.data().state);
+            syncReady = true;
+            panel.hidden = true;
+            listenToCloud(generation);
+          } catch (error) { cloudError(error); }
+        };
+        document.getElementById('useLocal').onclick = async () => {
+          if (generation !== authGeneration) return;
+          if (!confirm('Enviar todos os dados deste aparelho e substituir os dados da nuvem? Confirme que este aparelho contém a versão que deseja manter.')) return;
+          const button = document.getElementById('useLocal');
+          button.disabled = true;
+          try {
+            archiveLocalState();
+            await cloudStateRef.set({ state: JSON.parse(JSON.stringify(state)), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            if (generation !== authGeneration) return;
+            syncReady = true;
+            panel.hidden = true;
+            listenToCloud(generation);
+          } catch (error) { cloudError(error); }
+          finally { button.disabled = false; }
+        };
+      } catch (error) { if (generation === authGeneration) cloudError(error); }
+    }
 
-        cloudStateRef.onSnapshot(snapshot => {
-          if (snapshot.exists && snapshot.data()?.state) {
-            applyRemoteState(snapshot.data().state);
-            setCloudStatus('Sincronizado na nuvem');
-          }
-        }, error => {
-          console.error(error);
-          setCloudStatus('Modo local - falha ao ouvir nuvem');
-        });
-      } catch (error) {
-        console.error(error);
-        setCloudStatus('Modo local - confira o Firestore');
+    async function initCloudSync() {
+      if (!window.firebase?.auth || !window.firebase?.firestore) {
+        setCloudStatus('Dados locais — login indisponível. Confira sua conexão.');
+        return;
       }
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      document.getElementById('googleLogin').onclick = async () => {
+        const button = document.getElementById('googleLogin');
+        button.disabled = true;
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          await firebase.auth().signInWithPopup(provider);
+        } catch (error) {
+          console.error(error);
+          setCloudStatus(error.code === 'auth/unauthorized-domain'
+            ? 'Autorize bruno-rod.github.io no Firebase Authentication.'
+            : 'Login não concluído. Permita a janela de login e tente novamente.');
+        } finally { button.disabled = false; }
+      };
+      document.getElementById('googleLogout').onclick = async () => {
+        try { await firebase.auth().signOut(); }
+        catch (error) { setCloudStatus('Não foi possível sair. Tente novamente.'); }
+      };
+      firebase.auth().onAuthStateChanged(connectAccount, cloudError);
     }
 
     function normalizeName(value) {
